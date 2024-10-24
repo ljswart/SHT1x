@@ -1,0 +1,8 @@
+SHT1x            KEYWORD1
+readTemperatureC KEYWORD2
+readTemperatureF KEYWORD2
+readHumidity     KEYWORD2
+Voltage          KEYWORD2
+TemperatureMeasurementResolution KEYWORD2
+HumidityMeasurementResolution    KEYWORD2
+ShtCommand       KEYWORD2
