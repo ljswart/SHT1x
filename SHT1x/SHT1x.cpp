@@ -15,6 +15,7 @@
  * temperature / humidity sensors from Sensirion (www.sensirion.com).
  */
 #include "SHT1x.h"
+#include <math.h>
 
 SHT1x::SHT1x(uint8_t dataPin, uint8_t clockPin, Voltage voltage)
     : _dataPin(dataPin), _clockPin(clockPin), _voltage(voltage),
@@ -27,6 +28,7 @@ float SHT1x::readTemperatureC() const {
     const double D1 = getD1ForC(_voltage);
     const double D2 = getD2ForC(_tempResolution);
     uint16_t rawData = readRawData(ShtCommand::MeasureTemperature, _dataPin, _clockPin);
+    if (rawData == kRawDataError) return NAN;
     return D1 + D2 * rawData;
 }
 
@@ -34,6 +36,7 @@ float SHT1x::readTemperatureF() const {
     const double D1 = getD1ForF(_voltage);
     const double D2 = getD2ForF(_tempResolution);
     uint16_t rawData = readRawData(ShtCommand::MeasureTemperature, _dataPin, _clockPin);
+    if (rawData == kRawDataError) return NAN;
     return D1 + D2 * rawData;
 }
 
@@ -44,8 +47,10 @@ float SHT1x::readHumidity() const {
     const double T1 = getT1(_humidityResolution);
     const double T2 = getT2(_humidityResolution);
     uint16_t rawData = readRawData(ShtCommand::MeasureRelativeHumidity, _dataPin, _clockPin);
+    if (rawData == kRawDataError) return NAN;
     double linearHumidity = C1 + C2 * rawData + C3 * rawData * rawData;
     float temperature = readTemperatureC();
+    if (isnan(temperature)) return NAN;
     return (temperature - 25.0) * (T1 + T2 * rawData) + linearHumidity;
 }
 
@@ -53,10 +58,10 @@ float SHT1x::readHumidity() const {
 
 uint16_t SHT1x::readRawData(ShtCommand command, uint8_t dataPin, uint8_t clockPin) const {
     if (!sendCommandSHT(command, dataPin, clockPin)) {
-        return NAN;
+        return kRawDataError;
     }
     if (!waitForResultSHT(dataPin)) {
-        return NAN;
+        return kRawDataError;
     }
     uint16_t result = getData16SHT(dataPin, clockPin);
     skipCrcSHT(dataPin, clockPin);

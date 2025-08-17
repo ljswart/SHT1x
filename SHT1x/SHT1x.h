@@ -61,6 +61,7 @@ class SHT1x
     float readTemperatureF() const;
 
   private:
+    static const uint16_t kRawDataError = 0xFFFF;
     uint16_t readRawData(ShtCommand command, uint8_t dataPin, uint8_t clockPin) const;
     bool sendCommandSHT(ShtCommand command, uint8_t dataPin, uint8_t clockPin) const;
     bool waitForResultSHT(uint8_t dataPin) const;
